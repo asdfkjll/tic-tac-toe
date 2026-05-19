@@ -1,7 +1,3 @@
-const game = (() => {
-    return {}
-})()
-
 const gameboard = (() => {
     const gameboard = [
 	["", "", ""],
@@ -9,21 +5,16 @@ const gameboard = (() => {
 	["", "", ""]
     ] 
 
-    const playerMark = (player, position) => {
-	if(gameboard[position.x][position.y] !== "") return
-	gameboard[position.x][position.y] = player.mark
-    } 
     const getGameboard = () => gameboard
+
     const getRow = (rowIndex) => gameboard[rowIndex] 
+
     const getCol = (colIndex) => {
 	const col = []
-
-	for(let i = 0; i < gameboard.length; i++) {
-	    newCol.push(gameboard[i][colIndex]) 
-	}
-
+	for(const i in gameboard) col.push(gameboard[i][colIndex]) 
 	return col
     }
+
     const getDiagonal = (reverse = false) => {
 	const diagonal = []
 
@@ -35,15 +26,12 @@ const gameboard = (() => {
 	    return reversedDiagonal 
 	}
 
-	for(const i in gameboard) {
-	    diagonal.push(gameboard[i][i]) 
-	}
+	for(const i in gameboard) diagonal.push(gameboard[i][i]) 
 
 	return diagonal
     }
 
     return {
-	playerMark,
 	getGameboard,
 	getRow,
 	getCol,
@@ -57,8 +45,72 @@ function player(name, mark) {
     const getScore = () => score
     const giveScore = () => score++  
 
-    return { name, mark, getScore, giveScore }
+    const placeMark = (position) => {
+	// position: {x, y} 
+	if(gameboard.getGameboard()[position.y][position.x] !== "") return
+	gameboard.getGameboard()[position.y][position.x] = mark
+    }
+
+    return { name, mark, getScore, giveScore, placeMark }
 } 
 
-const player1 = player("gugu gagaa", "x")
-const player2 = player("waifu-chan", "o")
+const game = (() => {
+    // controls the main logic and game bucle
+
+    // players
+    const players = {x: player("gugu gaga", "x"), o: player("chikiro-chan", "o")}
+    // game variables
+    let gameOver = false
+    let turn = players.x
+
+    const arrayWinner = (array) => {
+	// Iterate an array to determine an winner (ej: ["x", "x", "x"] returns "x")
+	// returns the winner "x"/"o", if there is no winner, then returns null
+
+	const firstElem = array[0]
+
+	if(firstElem === "") return null
+	for(const elem of array) if(elem !== firstElem) return null
+
+	return firstElem
+    }
+
+    const gameboardWinner = () => {
+	// reads the entire gameboard and returns a winner, if not, returns null
+
+	for(const i in gameboard.getGameboard()) {
+	    const winnerRow = arrayWinner(gameboard.getRow(i))
+	    const winnerCol = arrayWinner(gameboard.getCol(i))
+
+	    if(!(winnerRow === null && winnerCol === null)) {
+		return winnerRow === null ? winnerCol : winnerRow
+	    }
+	}
+
+	const winnerDiag = arrayWinner(gameboard.getDiagonal())
+	const winnerReversedDiag = arrayWinner(gameboard.getDiagonal(true))
+
+	if(!(winnerDiag === null && winnerReversedDiag === null)) {
+	    return winnerDiag === null ? winnerReversedDiag : winnerDiag
+	}
+
+	return null
+    }
+
+    while(!gameOver) {
+	console.log(`plays "${turn.name}" as "${turn.mark}"`)
+
+	turn.placeMark({x: prompt("x"), y: prompt("y")})
+	turn = turn == players.x ? players.o : players.x 
+	turnWinner = gameboardWinner()
+
+	if(!(turnWinner === null)) {
+	    console.log(`GAME OVER! The winner is "${turnWinner === players.x ? players.x.name : players.o.name}" playing as "${turnWinner}"`)
+	    gameOver = true
+	}
+    }
+
+    return { }
+})()
+
+
