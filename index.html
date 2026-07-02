@@ -18,20 +18,46 @@
 
 <body>
     <div class="container">
-	<div class="info">Hello, Tic Tac Toe</div>
+	<div class="msg">Hello, Tic Tac Toe</div>
+
+	<dialog>
+	    <button autofocus>Close</button>
+	    <form method="dialog">
+		<div class="input-group">
+		    <label for="playerOne-name">Player 1 (X) Name:</label>
+		    <input type="text" id="playerOne-name" placeholder="Enter Name" required>
+		</div>
+
+		<div class="input-group">
+		    <label for="playerTwo-name">Player 2 (O) Name:</label>
+		    <input type="text" id="playerTwo-name" placeholder="Enter Name" required>
+		</div>
+
+		<div class="actions">
+		    <button type="submit" id="start-btn">Start Game</button>
+		</div>
+	    </form>
+	</dialog>
+
+	<button id="open-dialog-btn">Game Options</button>
 
 	<div class="board">
-	    <div class="box"></div>
-	    <div class="box"></div>
-	    <div class="box"></div>
+	    <div class="box" data-x="0" data-y="0"></div>
+	    <div class="box" data-x="1" data-y="0"></div>
+	    <div class="box" data-x="2" data-y="0"></div>
 
-	    <div class="box"></div>
-	    <div class="box"></div>
-	    <div class="box"></div>
+	    <div class="box" data-x="0" data-y="1"></div>
+	    <div class="box" data-x="1" data-y="1"></div>
+	    <div class="box" data-x="2" data-y="1"></div>
 
-	    <div class="box"></div>
-	    <div class="box"></div>
-	    <div class="box"></div>
+	    <div class="box" data-x="0" data-y="2"></div>
+	    <div class="box" data-x="1" data-y="2"></div>
+	    <div class="box" data-x="2" data-y="2"></div>
+	</div>
+
+	<div class="info">
+	    <span class="info-p1"><span class="name"></span>:<span class="score">0</span></span>
+	    <span class="info-p2"><span class="name"></span>:<span class="score">0</span></span>
 	</div>
     </div>
 </body>

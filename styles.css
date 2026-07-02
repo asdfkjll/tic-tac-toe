@@ -16,13 +16,34 @@ body {
     gap: 15px;
 }
 
-.info {
+.info, .msg {
     background-color: #fff;
     border: 1px solid #000;
     width: 500px;
+    min-height: 80px;
     padding: 15px;
     font-size: 1.8em;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.8rem;
+}
+
+.info .score {
+    color: red;
+}
+
+button {
+    padding: 15px 30px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin: 15px 0;
 }
 
 .board {
@@ -36,4 +57,7 @@ body {
 
 .box {
     border: 1px solid #000;
+    font-size: 2.5rem;
+    text-align: center;
+    align-content: center;
 }
