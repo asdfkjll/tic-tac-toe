@@ -125,6 +125,7 @@ const ui = (() => {
 	const showButton = document.querySelector("#open-dialog-btn")
 	const closeButton = document.querySelector("dialog button")
 	const gameForm = document.querySelector("dialog form")
+	const resetBtn = document.querySelector("#reset-btn")
 
 	// "Show the dialog" button opens the dialog modally
 	showButton.addEventListener("click", () => dialog.showModal())
@@ -140,22 +141,38 @@ const ui = (() => {
 	    const playerTwoName = document.querySelector("#playerTwo-name").value
 
 	    gameboard.resetGameboard()
+	    game.stop()
 	    game.start(playerOneName, playerTwoName)
+	    dialog.close()
+	})
+	
+	resetBtn.addEventListener("click", () => {
+	    gameboard.resetGameboard()
+	    game.stop()
+	    game.start(game.players["x"].name, game.players["o"].name)
 	    dialog.close()
 	})
     }
 
     gameDialogController()
     
-    const getSpaceClicked = () => {
-	return new Promise((resolve) => {
-	    $board.addEventListener('click', function onClick(event) {
-		const targetSpace = event.target 
+    const getSpaceClicked = (abortSignal) => {
+	return new Promise((resolve, reject) => {
+	    if(abortSignal?.aborted) {
+		return reject(new Error("Game Over"))
+	    }
+
+	    $board.addEventListener("click", function onClick(event) {
+		const targetSpace = event.target
 
 		if (targetSpace && targetSpace.dataset.x !== undefined) {
-		    $board.removeEventListener('click', onClick)
+		    $board.removeEventListener("click", onClick)
 		    resolve(targetSpace) 
 		}
+	    }, { signal: abortSignal })
+
+	    abortSignal?.addEventListener("abort", () => {
+		reject(new Error("Game Over"))
 	    })
 	})
     }
@@ -204,52 +221,76 @@ const game = (() => {
 	return null
     }
 
-    const start = async (playerOneName = "gugu gaga", playerTwoName = "chikiro-chan") => {
-	const players = {"x": player(playerOneName, "x"), "o": player(playerTwoName, "o")}
-	let gameOver = false
+    let gameController = new AbortController()
+    let gameOver = true
+    let players
+
+    const stop = () => { 
+	console.log("Stop Game...")
+	gameOver = true 
+	if(gameController) gameController.abort() 
+    }
+
+    const start = async(playerOneName = "gugu gaga", playerTwoName = "chikiro-chan") => {
+	console.log("New Game Started")
+
+	gameOver = false
+	gameController = new AbortController()
+	players = {"x": player(playerOneName, "x"), "o": player(playerTwoName, "o")}
+
 	let turn = players["x"]
 
 	ui.renderGameboard()
 	ui.renderHudInfo(players["x"], players["o"])
 
 	while(!gameOver) {
-	    console.log(`plays "${turn.name}" as "${turn.mark}"`)
+	    try {
+		console.log(`plays "${turn.name}" as "${turn.mark}"`)
 
-	    let winner
-	    let spaceSelected
-	    let playerMove
-	    let cordinates
+		let winner
+		let spaceSelected
+		let playerMove
+		let cordinates
 
-	    // reads player's move and play it if valid
-	    do {
-		spaceSelected = undefined
-		spaceSelected = await ui.getSpaceClicked()
-		cordinates = {x: spaceSelected.dataset.x, y: spaceSelected.dataset.y}
-		playerMove = turn.placeMark(cordinates)
-	    } while(spaceSelected === undefined || playerMove === null)
+		// reads player's move and play it if valid
+		do {
+		    spaceSelected = undefined
+		    spaceSelected = await ui.getSpaceClicked(gameController.signal)
+		    cordinates = {x: spaceSelected.dataset.x, y: spaceSelected.dataset.y}
+		    playerMove = turn.placeMark(cordinates)
+		} while(spaceSelected === undefined || playerMove === null)
 
-	    // render 
-	    ui.renderGameboard()
+		// render 
+		ui.renderGameboard()
 
-	    // determine if there is a winner/tie in the gameboard after the move, if so then break the game bucle, otherwise continue
-	    winner = gameboardWinner()
+		// determine if there is a winner/tie in the gameboard after the move, if so then break the game bucle, otherwise continue
+		winner = gameboardWinner()
 
-	    if(winner === "tie") {
-		console.log("GAME OVER! its a tie")
-		gameOver = true
-	    } else if(winner !== null) {
-		console.log(`GAME OVER! The winner is "${players[winner].name}" playing as "${players[winner].mark}"`)
-		players[winner].giveScore()
-		gameOver = true
-	    } 
+		if(winner === "tie") {
+		    console.log("GAME OVER! its a tie")
+		    gameOver = true
+		} else if(winner !== null) {
+		    console.log(`GAME OVER! The winner is "${players[winner].name}" playing as "${players[winner].mark}"`)
+		    players[winner].giveScore()
+		    gameOver = true
+		} 
 
-	    ui.renderHudInfo(players["x"], players["o"])
+		ui.renderHudInfo(players["x"], players["o"])
 
-	    // flip turn to the other player
-	    turn = turn == players["x"] ? players["o"] : players["x"] 
+		// flip turn to the other player
+		turn = turn == players["x"] ? players["o"] : players["x"] 
+	    } catch(error) {
+		break
+	    }
 	}
     }
 
-    return { start }
+    return { 
+	start, 
+	stop,
+	get gameOver() { return gameOver },
+	get players() { return players }
+    }
 })()
+
 
