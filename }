@@ -154,6 +154,11 @@ function player(name, mark) {
 const ui = (() => {
     const renderGameboard = (gameboard) => {
 	// gameboard must be an array
+    
+	if(!gameboard) {
+	    console.warn(`warning: renderGamboard function call is missing "gameboard" arguments`)
+	    return null
+	}
 
 	for(const y in gameboard) {
 	    for(const x in gameboard[y]) {
@@ -196,7 +201,7 @@ const ui = (() => {
 	})
 	
 	resetBtn.addEventListener("click", () => {
-	    reset()
+	    reset(game.players["x"].name, game.players["o"].name)
 	    dialog.close()
 	})
     }
@@ -239,7 +244,7 @@ const game = (() => {
     let players
 
     const stop = () => { 
-	console.log("Game Stopped")
+	console.log("Stop Game...")
 
 	gameOver = true 
 	if(gameController) gameController.abort() 
@@ -302,8 +307,7 @@ const game = (() => {
 
     return { 
 	start, 
-	stop,
-	get players() { return players }
+	stop
     }
 })()
 
@@ -314,9 +318,7 @@ function tttInit(playerOneName, playerTwoName) {
 }
 
 function tttRestart() {
-    gameboard.reset()
-    game.stop()
-    game.start(game.players.x.getName(), game.players.o.getName()) 
+    
 }
 
 ui.gameOptionsMenuController(tttInit, tttRestart)

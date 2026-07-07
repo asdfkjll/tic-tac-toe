@@ -20,7 +20,7 @@
     <div class="container">
 	<div class="msg">Hello, Tic Tac Toe</div>
 
-	<dialog>
+	<dialog id="game-options">
 	    <button autofocus>Close</button>
 	    <form method="dialog">
 		<div class="input-group">
@@ -40,7 +40,7 @@
 	    </form>
 	</dialog>
 
-	<button id="open-dialog-btn">Game Options</button>
+	<button id="game-options-open-btn">Game Options</button>
 
 	<div class="board">
 	    <div class="box" data-x="0" data-y="0"></div>
@@ -57,8 +57,8 @@
 	</div>
 
 	<div class="info">
-	    <span class="info-p1"><span class="name"></span>:<span class="score">0</span></span>
-	    <span class="info-p2"><span class="name"></span>:<span class="score">0</span></span>
+	    <span class="info-p1"></span>
+	    <span class="info-p2"></span>
 	</div>
     </div>
 </body>
